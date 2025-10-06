@@ -1,0 +1,39 @@
+services:
+  mongodb:
+    image: "mongo"
+    volumes:
+      - data:/data/db:ro
+    env_file:
+      - ./env/mongo.env
+    networks:
+      - goals-net
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+volumes:
+  data:
+
+networks:
+  goals-net:
